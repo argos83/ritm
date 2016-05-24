@@ -23,4 +23,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sinatra', '~> 1.4'
   s.add_development_dependency 'thin', '~> 1.6'
   s.add_development_dependency 'rspec-expectations', '~> 3.5.beta3S'
+  s.add_development_dependency 'rake', '~> 11.1'
 end

@@ -19,9 +19,9 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'webrick', '~> 1.3'
   s.add_runtime_dependency 'certificate_authority', '~> 0.1.6'
   s.add_runtime_dependency 'dot_hash', '~> 0.5'
-  s.add_development_dependency 'minitest', '~> 5.8'
+  s.add_development_dependency 'rspec', '~> 3.4'
+  s.add_development_dependency 'rubocop', '~> 0.40'
   s.add_development_dependency 'sinatra', '~> 1.4'
   s.add_development_dependency 'thin', '~> 1.6'
-  s.add_development_dependency 'rspec-expectations', '~> 3.5.beta3S'
   s.add_development_dependency 'rake', '~> 11.1'
 end

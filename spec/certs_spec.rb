@@ -2,7 +2,7 @@ require_relative 'spec_helper'
 require 'ritm/certs/certificate'
 require 'ritm/certs/ca'
 
-describe Ritm::Certificate do
+RSpec.describe Ritm::Certificate do
   let(:a_common_name) { 'testcert.example.com' }
   let(:a_serial_number) { 123 }
   let(:a_cert) { Ritm::Certificate.create(a_common_name, serial_number: a_serial_number) }

@@ -1,16 +1,33 @@
 TESTS_DIR = File.dirname(__FILE__)
 PROJECT_DIR = File.join(TESTS_DIR, '..', 'lib')
 
-# Load project lib dir
-$LOAD_PATH.unshift PROJECT_DIR
-$LOAD_PATH.unshift TESTS_DIR
-
 def test_path(path)
   File.join(TESTS_DIR, path)
 end
 
-require 'helpers/start_proxy'
+require 'ritm'
+require 'ritm/proxy/launcher'
+
 require 'helpers/web_server'
-require 'minitest/autorun'
 require 'rspec/expectations'
-require 'rspec/expectations/minitest_integration'
+
+proxy = Ritm::Proxy::Launcher.new proxy_port: 9090,
+                                  ssl_reverse_proxy_port: 9091,
+                                  ca_crt_path: test_path('resources/insecure_ca.crt'),
+                                  ca_key_path: test_path('resources/insecure_ca.priv')
+http_pid = nil
+https_pid = nil
+
+RSpec.configure do |c|
+  c.before(:suite) do
+    proxy.start
+    http_pid = fork { WebServer.run! }
+    https_pid = fork { SslWebServer.run! }
+    Thread.pass
+  end
+  c.after(:suite) do
+    proxy.shutdown
+    Process.kill('INT', http_pid)
+    Process.kill('INT', https_pid)
+  end
+end

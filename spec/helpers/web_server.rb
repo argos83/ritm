@@ -15,40 +15,22 @@ class WebServer < Sinatra::Base
   set :server, :thin
   set :bind, '127.0.0.1'
   set :port, 4567
-  set :logging, false
+  disable :logging
   disable :protection
-  set :specs, {}
-
-  @requests_count = 0
-
-  class << self
-    attr_accessor :requests_count
-  end
-
-  def self.run_async
-    t = Thread.new { run! }
-    trap(:TERM) { t.kill }
-    trap(:INT) { t.kill }
-    Thread.pass
-  end
 
   def extract_headers(env)
     ret = {}
     env.each do |k, v|
       case k
-        when 'CONTENT_LENGTH', 'CONTENT_TYPE'
-          ret[k.downcase.gsub('_','-')] = v
-        when /^HTTP_.*/
-          h = k.dup
-          h.slice!('HTTP_')
-          ret[h.downcase.gsub('_','-')] = v
+      when 'CONTENT_LENGTH', 'CONTENT_TYPE'
+        ret[k.downcase.tr('_', '-')] = v
+      when /^HTTP_.*/
+        h = k.dup
+        h.slice!('HTTP_')
+        ret[h.downcase.tr('_', '-')] = v
       end
     end
     ret
-  end
-
-  before do
-    WebServer.requests_count +=1
   end
 
   get '/ping' do
@@ -70,7 +52,7 @@ class WebServer < Sinatra::Base
   end
 
   error do |e|
-    "#{e.class}\n#{e.to_s}\n#{e.backtrace.join("\n")}"
+    "#{e.class}\n#{e}\n#{e.backtrace.join("\n")}"
   end
 end
 
@@ -79,8 +61,9 @@ class SslWebServer < WebServer
     set :environment, :test
     set :bind, '127.0.0.1'
     set :port, 4443
-    set :logging, false
+    disable :logging
     set :server, :thin
+
     class << settings
       def server_settings
         {
@@ -93,7 +76,3 @@ class SslWebServer < WebServer
     end
   end
 end
-
-WebServer.run_async
-SslWebServer.run_async
-

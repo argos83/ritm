@@ -8,6 +8,7 @@ require 'ritm/interception/handlers'
 require 'ritm/certs/ca'
 
 module Ritm
+  # WIP: Create and scan RitM projects
   class Project
     attr_reader :path, :settings
 

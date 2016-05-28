@@ -31,7 +31,7 @@ module Ritm
         @certificate = ca_certificate(crt_path, key_path)
         https_forward = "#{ssl_proxy_host}:#{ssl_proxy_port}"
 
-        build_reverse_proxy(ssl_proxy_host, ssl_proxy_port, response_interceptor, request_interceptor)
+        build_reverse_proxy(ssl_proxy_host, ssl_proxy_port, request_interceptor, response_interceptor)
         build_proxy(proxy_host, proxy_port, https_forward, request_interceptor, response_interceptor)
       end
 

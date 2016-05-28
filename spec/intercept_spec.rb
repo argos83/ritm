@@ -4,10 +4,10 @@ require 'json'
 require 'ritm'
 require 'helpers/ritm_spec_utils'
 
-describe Ritm do
+RSpec.describe Ritm do
   include RitmSpecUtils
 
-  ['http://localhost:4567'].each do |base_url| # TODO: add 'https://localhost:4443'
+  %w(http://localhost:4567 https://localhost:4443).each do |base_url|
     before(:each) do
       interceptor.clear
     end
@@ -19,15 +19,19 @@ describe Ritm do
       expect(interceptor.requests.size).to be 1
       expect(interceptor.responses.size).to be 1
     end
-  
+
     describe 'when intercepting requests' do
       it 'intercepts requests before they are sent' do
-        req_count = 0
-        interceptor.on_request = proc { |_req| req_count = WebServer.requests_count }
+        exec_order = [:a]
+        interceptor.on_request = proc do |_req|
+          exec_order << :c
+        end
+        exec_order << :b
         client(base_url).get('/ping')
-        expect(req_count).to be(WebServer.requests_count - 1)
+        exec_order << :d
+        expect(exec_order).to eq([:a, :b, :c, :d])
       end
-  
+
       it 'gets access to method, resource, headers, and body' do
         client(base_url).post('/echo?query=string') do |r|
           r.headers['Content-Type'] = 'application/json'
@@ -39,7 +43,7 @@ describe Ritm do
         expect(req.header['content-type']).to eq(['application/json'])
         expect(req.body).to eq('{ "password": "12345" }')
       end
-  
+
       it 'can modify method, resource, headers, and body' do
         interceptor.on_request = proc do |req|
           req.request_method = 'PUT'
@@ -57,19 +61,21 @@ describe Ritm do
         expect(res[:query]).to eq('arg=1')
         expect(res[:body]).to eq('{ "password": "666" }')
         expect(res[:headers][:'content-type']).to eq('text/plain')
-        # TODO: implement changing host:port when intercepting 
+        # TODO: implement changing host:port when intercepting
         # expect(res[:headers][:host]).to eq('127.0.0.1.xip.io:4567')
       end
     end
-    
+
     describe 'when intercepting responses' do
       it 'intercepts responses before the client gets them' do
-        flag = false
-        interceptor.on_response = proc { |_req, _res| flag = true }
-        result = flag || client(base_url).get('/ping')
-        expect(flag).to be(true)
+        exec_order = [:a]
+        interceptor.on_response = proc { |_req, _res| exec_order << :c }
+        exec_order << :b
+        client(base_url).get('/ping')
+        exec_order << :d
+        expect(exec_order).to eq([:a, :b, :c, :d])
       end
-      
+
       it 'gets access to status, headers, and body' do
         client(base_url).get('/ping')
         res = interceptor.responses.last
@@ -78,7 +84,7 @@ describe Ritm do
         expect(res.header['content-type']).to eq('text/html;charset=utf-8')
         expect(res.body).to eq('pong')
       end
-      
+
       it 'can modify status, headers, and body' do
         interceptor.on_response = proc do |_req, res|
           res.body = 'plonch'

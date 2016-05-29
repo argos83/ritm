@@ -41,11 +41,15 @@ module Ritm
       @client.send req_method do |req|
         req.url request.request_uri
         req.body = request.body
-        request.header.each do |name, value|
-          req.headers[name] = value unless strip?(name, Ritm.conf.misc.strip_request_headers)
-        end
-        Ritm.conf.misc.add_request_headers.each { |k, v| req.headers[k] = v }
+        add_request_headers(req, request)
       end
+    end
+
+    def add_request_headers(faraday_request, webrick_request)
+      webrick_request.header.each do |name, value|
+        faraday_request.headers[name] = value unless strip?(name, Ritm.conf.misc.strip_request_headers)
+      end
+      Ritm.conf.misc.add_request_headers.each { |k, v| faraday_request.headers[k] = v }
     end
 
     def to_webrick_response(faraday_response, webrick_response)

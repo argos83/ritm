@@ -11,18 +11,23 @@ module Ritm
       # Override
       def setup_ssl_context(config)
         ctx = super(config)
-        ca = config[:ca]
+        prepare_sni_callback(ctx, config[:ca])
+        ctx
+      end
 
-        # Keeps track of the created self-signed certificates
-        # TODO: this can grow a lot and take up memory, fix by either:
-        # 1. implementing wildcard certificates generation (so there's one certificate per top level domain)
-        # 2. Use the same key material (private/public keys) for all the server names and just do the signing on-the-fly
-        # 3. both of the above
+      private
+
+      # Keeps track of the created self-signed certificates
+      # TODO: this can grow a lot and take up memory, fix by either:
+      # 1. implementing wildcard certificates generation (so there's one certificate per top level domain)
+      # 2. Use the same key material (private/public keys) for all the server names and just do the signing on-the-fly
+      # 3. both of the above
+      def prepare_sni_callback(ctx, ca)
         contexts = {}
         mutex = Mutex.new
 
         # Sets the SNI callback on the SSLTCPSocket
-        ctx.servername_cb = proc { |sock, servername|
+        ctx.servername_cb = proc do |sock, servername|
           mutex.synchronize do
             unless contexts.include? servername
               cert = Ritm::Certificate.create(servername)
@@ -31,24 +36,13 @@ module Ritm
             end
           end
           contexts[servername]
-        }
-        ctx
+        end
       end
 
       def context_with_cert(original_ctx, cert)
-        ctx = OpenSSL::SSL::SSLContext.new
+        ctx = original_ctx.dup
         ctx.key = OpenSSL::PKey::RSA.new(cert.private_key)
         ctx.cert = OpenSSL::X509::Certificate.new(cert.pem)
-        ctx.client_ca = original_ctx.client_ca
-        ctx.extra_chain_cert = original_ctx.extra_chain_cert
-        ctx.ca_file = original_ctx.ca_file
-        ctx.ca_path = original_ctx.ca_path
-        ctx.cert_store = original_ctx.cert_store
-        ctx.verify_mode = original_ctx.verify_mode
-        ctx.verify_depth = original_ctx.verify_depth
-        ctx.verify_callback = original_ctx.verify_callback
-        ctx.timeout = original_ctx.timeout
-        ctx.options = original_ctx.options
         ctx
       end
     end

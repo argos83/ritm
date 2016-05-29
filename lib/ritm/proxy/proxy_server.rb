@@ -36,10 +36,8 @@ module Ritm
         begin
           send("do_#{req.request_method}", req, res)
         rescue NoMethodError
-          raise WEBrick::HTTPStatus::MethodNotAllowed,
-                "unsupported method `#{req.request_method}'."
+          raise WEBrick::HTTPStatus::MethodNotAllowed, "unsupported method `#{req.request_method}'."
         rescue => err
-          logger.debug("#{err.class}: #{err.message}")
           raise WEBrick::HTTPStatus::ServiceUnavailable, err.message
         end
 

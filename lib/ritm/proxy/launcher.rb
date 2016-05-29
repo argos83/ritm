@@ -16,23 +16,10 @@ module Ritm
       #   request_interceptor [Proc |request|]: the handler for request interception
       #   response_interceptor [Proc |request, response|]: the handler for response interception
       def initialize(**args)
-        c = Ritm.conf
-        proxy_host = args.fetch(:interface, c.proxy.bind_address)
-        proxy_port = args.fetch(:proxy_port, c.proxy.bind_port)
-        ssl_proxy_port = args.fetch(:ssl_reverse_proxy_port, c.ssl_reverse_proxy.bind_address)
-        ssl_proxy_host = c.ssl_reverse_proxy.bind_address
+        build_settings(**args)
 
-        crt_path = args.fetch(:ca_crt_path, c.ssl_reverse_proxy.ca.pem)
-        key_path = args.fetch(:ca_key_path, c.ssl_reverse_proxy.ca.key)
-
-        request_interceptor = args[:request_interceptor] || DEFAULT_REQUEST_HANDLER
-        response_interceptor = args[:response_interceptor] || DEFAULT_RESPONSE_HANDLER
-
-        @certificate = ca_certificate(crt_path, key_path)
-        https_forward = "#{ssl_proxy_host}:#{ssl_proxy_port}"
-
-        build_reverse_proxy(ssl_proxy_host, ssl_proxy_port, request_interceptor, response_interceptor)
-        build_proxy(proxy_host, proxy_port, https_forward, request_interceptor, response_interceptor)
+        build_reverse_proxy(@ssl_proxy_host, @ssl_proxy_port, @request_interceptor, @response_interceptor)
+        build_proxy(@proxy_host, @proxy_port, @https_forward, @request_interceptor, @response_interceptor)
       end
 
       # Starts the service (non blocking)
@@ -48,6 +35,22 @@ module Ritm
       end
 
       private
+
+      def build_settings(**args)
+        c = Ritm.conf
+        @proxy_host = args.fetch(:interface, c.proxy.bind_address)
+        @proxy_port = args.fetch(:proxy_port, c.proxy.bind_port)
+        @ssl_proxy_port = args.fetch(:ssl_reverse_proxy_port, c.ssl_reverse_proxy.bind_address)
+        @ssl_proxy_host = c.ssl_reverse_proxy.bind_address
+        @https_forward = "#{@ssl_proxy_host}:#{@ssl_proxy_port}"
+
+        @request_interceptor = args[:request_interceptor] || DEFAULT_REQUEST_HANDLER
+        @response_interceptor = args[:response_interceptor] || DEFAULT_RESPONSE_HANDLER
+
+        crt_path = args.fetch(:ca_crt_path, c.ssl_reverse_proxy.ca.pem)
+        key_path = args.fetch(:ca_key_path, c.ssl_reverse_proxy.ca.key)
+        @certificate = ca_certificate(crt_path, key_path)
+      end
 
       def build_proxy(host, port, https_forward_to, req_intercept, res_intercept)
         @http = Ritm::Proxy::ProxyServer.new(Port: port,

@@ -4,3 +4,4 @@ machine:
 test:
   post:
     - bundle exec rspec
+    - bundle exec rubocop

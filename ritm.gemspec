@@ -10,9 +10,9 @@ Gem::Specification.new do |s|
   s.summary     = 'Ruby In The Middle'
   s.description = 'HTTP(S) Intercept Proxy'
   s.authors     = ['Sebastián Tello']
-  s.email       = 'argos83@gmail.com'
+  s.email       = 'argos83+ritm@gmail.com'
   s.files       = Dir['lib/**/*']
-  s.homepage    = 'http://tello.se'
+  s.homepage    = 'https://github.com/argos83/ritm'
   s.license     = 'Apache License, v2.0'
   s.add_runtime_dependency 'faraday', '~> 0.9'
   s.add_runtime_dependency 'webrick', '~> 1.3'

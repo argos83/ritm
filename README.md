@@ -3,7 +3,7 @@
 
 <img src="docs/ritm.png" width="500">
 
-**Ruby in the middle** (RITM) is a HTTP/HTTPS interception proxy with on-the-fly certificate generation and signing, which leaves the user with the
+**Ruby in the middle** (RITM) is an HTTP/HTTPS interception proxy with on-the-fly certificate generation and signing, which leaves the user with the
 full power of the Ruby language to intercept and even modify requests and responses as she pleases.
 
 ## Installation
@@ -57,7 +57,7 @@ full power of the Ruby language to intercept and even modify requests and respon
 
 With the previous example your client might have encountered issues when trying to access HTTPS resources. In some cases you can add an exception to
 your browser (or instruct your http client not to verify certificates) but [in some other cases](https://tools.ietf.org/html/rfc6797) you won't be
-able to add exceptions. The reason for this is that in order to decrypt and being able to modify SSL traffic, RITM will have to be the one doing the
+able to add exceptions. The reason for this is that in order to decrypt and to be able to modify SSL traffic, RITM will have to be the one doing the
 SSL negotiatiation with the client (using its own set of certificates) and then it will establish a separate SSL session towards the server. I.e.:
 
 ```
@@ -65,7 +65,7 @@ Client <--- SSL session ---> RITM <--- SSL session ---> Server
 ```
 
 For every different server's hostname your client tries to communicate with, RITM will generate a certificate on the fly and sign it with a
-pre-configured Certificate Authority (CA). So, for being able to establish a secure connection you will need to configure your client (e.g. browser)
+pre-configured Certificate Authority (CA). So, in order to be able to establish a secure connection you will need to configure your client (e.g. browser)
 to trust RITM's CA.
 
 For security reasons, every time you start RITM's proxy with the default settings it will generate a new internal Certificate Authority. To use your
@@ -103,11 +103,11 @@ own CA instead (so it can be loaded and trusted by your browser) perform the fol
   ```
 3. **Trust the CA certificate into your browser or client**
 
-  I'll leave to you figuring out how this is done in your browser or client.
+  I'll leave it to you to figure out how this is done in your browser or client.
 4. **Surf the web!**
 5. When you are done **Remove the CA from your trusted authorities!** 
 
-  Or take a really good care of the CA private key since anyone in possession of that key will be capable of decrypting all your traffic! Also notice that when using the proxy every server will be automatically
+  Or take really good care of the CA private key since anyone in possession of that key will be capable of decrypting all your traffic! Also notice that when using the proxy every server will be automatically
   trusted even if the end server certificate is not valid.
 
 ## License

@@ -6,14 +6,10 @@ def test_path(path)
 end
 
 require 'ritm'
-require 'ritm/proxy/launcher'
-
 require 'helpers/web_server'
 require 'rspec/expectations'
 
-proxy = Ritm::Proxy::Launcher.new proxy_port: 9090,
-                                  ssl_reverse_proxy_port: 9091,
-                                  ca_crt_path: test_path('resources/insecure_ca.crt'),
+proxy = Ritm::Proxy::Launcher.new ca_crt_path: test_path('resources/insecure_ca.crt'),
                                   ca_key_path: test_path('resources/insecure_ca.priv')
 http_pid = nil
 https_pid = nil

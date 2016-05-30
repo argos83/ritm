@@ -10,7 +10,7 @@ module RitmSpecUtils
     Faraday.new(base_url) do |conn|
       conn.adapter :net_http
       conn.ssl[:verify] = false
-      conn.proxy 'http://localhost:9090'
+      conn.proxy 'http://localhost:8080'
     end
   end
 end

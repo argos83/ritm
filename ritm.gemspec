@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email       = 'argos83@gmail.com'
   s.files       = Dir['lib/**/*']
   s.homepage    = 'http://tello.se'
-  s.license     = 'MIT'
+  s.license     = 'Apache License, v2.0'
   s.add_runtime_dependency 'faraday', '~> 0.9'
   s.add_runtime_dependency 'webrick', '~> 1.3'
   s.add_runtime_dependency 'certificate_authority', '~> 0.1.6'

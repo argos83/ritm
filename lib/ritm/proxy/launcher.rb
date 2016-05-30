@@ -40,10 +40,9 @@ module Ritm
         c = Ritm.conf
         @proxy_host = args.fetch(:interface, c.proxy.bind_address)
         @proxy_port = args.fetch(:proxy_port, c.proxy.bind_port)
-        @ssl_proxy_port = args.fetch(:ssl_reverse_proxy_port, c.ssl_reverse_proxy.bind_address)
         @ssl_proxy_host = c.ssl_reverse_proxy.bind_address
+        @ssl_proxy_port = args.fetch(:ssl_reverse_proxy_port, c.ssl_reverse_proxy.bind_port)
         @https_forward = "#{@ssl_proxy_host}:#{@ssl_proxy_port}"
-
         @request_interceptor = args[:request_interceptor] || DEFAULT_REQUEST_HANDLER
         @response_interceptor = args[:response_interceptor] || DEFAULT_RESPONSE_HANDLER
 

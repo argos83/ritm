@@ -1,13 +1,11 @@
-TESTS_DIR = File.dirname(__FILE__)
-PROJECT_DIR = File.join(TESTS_DIR, '..', 'lib')
-
-def test_path(path)
-  File.join(TESTS_DIR, path)
-end
-
+require 'simplecov'
 require 'ritm'
 require 'helpers/web_server'
 require 'rspec/expectations'
+
+def test_path(path)
+  File.join(File.dirname(__FILE__), path)
+end
 
 proxy = Ritm::Proxy::Launcher.new ca_crt_path: test_path('resources/insecure_ca.crt'),
                                   ca_key_path: test_path('resources/insecure_ca.priv')

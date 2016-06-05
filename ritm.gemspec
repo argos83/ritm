@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'dot_hash', '~> 0.5'
   s.add_development_dependency 'rspec', '~> 3.4'
   s.add_development_dependency 'rubocop', '~> 0.40'
+  s.add_development_dependency 'simplecov', '~> 0.11'
   s.add_development_dependency 'sinatra', '~> 1.4'
   s.add_development_dependency 'thin', '~> 1.6'
   s.add_development_dependency 'rake', '~> 11.1'

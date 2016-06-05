@@ -15,7 +15,20 @@ RSpec.describe Ritm do
     it 'intercepts requests and responses' do
       expect(interceptor.requests.size).to be 0
       expect(interceptor.responses.size).to be 0
-      _response = client(base_url).get('/ping')
+      client(base_url).get('/ping')
+      expect(interceptor.requests.size).to be 1
+      expect(interceptor.responses.size).to be 1
+    end
+
+    it 'can disable interception temporarily' do
+      expect(interceptor.requests.size).to be 0
+      expect(interceptor.responses.size).to be 0
+      Ritm.disable
+      client(base_url).get('/ping')
+      expect(interceptor.requests.size).to be 0
+      expect(interceptor.responses.size).to be 0
+      Ritm.enable
+      client(base_url).get('/ping')
       expect(interceptor.requests.size).to be 1
       expect(interceptor.responses.size).to be 1
     end
@@ -98,6 +111,26 @@ RSpec.describe Ritm do
         expect(res.headers['content-type']).to eq('text/plain')
         expect(res.headers['x-custom']).to eq('narf')
         expect(res.body).to eq('plonch')
+      end
+
+      it 'gets gzip content automatically decoded' do
+        content = nil
+        interceptor.on_response = proc do |_req, res|
+          expect(res.header['content-encoding']).to be nil
+          content = res.body
+        end
+        client(base_url).get('/encoded/gzip')
+        expect(content).to eq 'Living is easy with eyes closed'
+      end
+
+      it 'gets deflate content automatically decoded' do
+        content = nil
+        interceptor.on_response = proc do |_req, res|
+          expect(res.header['content-encoding']).to be nil
+          content = res.body
+        end
+        client(base_url).get('/encoded/deflate')
+        expect(content).to eq 'Misunderstanding all you see'
       end
     end
   end

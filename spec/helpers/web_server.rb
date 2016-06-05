@@ -37,6 +37,23 @@ class WebServer < Sinatra::Base
     'pong'
   end
 
+  get '/encoded/gzip' do
+    headers['Content-Encoding'] = 'gzip'
+    StringIO.new.tap do |io|
+      gz = Zlib::GzipWriter.new(io)
+      begin
+        gz.write('Living is easy with eyes closed')
+      ensure
+        gz.close
+      end
+    end.string
+  end
+
+  get '/encoded/deflate' do
+    headers['Content-Encoding'] = 'deflate'
+    Zlib::Deflate.deflate('Misunderstanding all you see')
+  end
+
   [:get, :post, :put, :patch, :delete, :options].each do |method|
     send(method, '/echo') do
       request.body.rewind

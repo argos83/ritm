@@ -18,41 +18,30 @@ module Ritm
           key: nil
         }
       },
-
       intercept: {
-        # Is interception enabled
         enabled: true,
-
-        # Do not intercept requests whose URLs match/start with the given regex/strings (blacklist)
-        skip_urls: [],
-
-        # Intercepts requests whose  URLs match/start with the given regex/strings (whitelist)
-        # By default everything will be intercepted.
-        intercept_urls: []
-      },
-
-      misc: {
-        add_request_headers: {},
-        add_response_headers: { 'connection' => 'clone' },
-
-        strip_request_headers: [/proxy-*/],
-        strip_response_headers: ['strict-transport-security', 'transfer-encoding'],
-
-        unpack_gzip_deflate_in_requests: true,
-        unpack_gzip_deflate_in_responses: true,
+        request: {
+          add_headers: {},
+          strip_headers: [/proxy-*/],
+          unpack_gzip_deflate: true,
+          update_content_length: true
+        },
+        response: {
+          add_headers: { 'connection' => 'close' },
+          strip_headers: ['strict-transport-security'],
+          unpack_gzip_deflate: true,
+          update_content_length: true
+        },
         process_chunked_encoded_transfer: true
       }
     }.freeze
 
     def initialize(settings = {})
+      reset(settings)
+    end
+
+    def reset(settings = {})
       settings = DEFAULT_SETTINGS.merge(settings)
-      @values = {
-        dispatcher: Dispatcher.new,
-
-        # Is interception enabled
-        enabled: true
-      }
-
       @settings = settings.to_properties
     end
 
@@ -60,18 +49,14 @@ module Ritm
       @settings.send(m, *args, &block)
     end
 
-    def [](setting)
-      @values[setting]
-    end
-
     # Re-enable interception
     def enable
-      @values[:enabled] = true
+      @settings.intercept[:enabled] = true
     end
 
     # Disable interception
     def disable
-      @values[:enabled] = false
+      @settings.intercept[:enabled] = false
     end
   end
 end

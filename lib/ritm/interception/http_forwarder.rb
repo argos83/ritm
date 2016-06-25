@@ -28,7 +28,6 @@ module Ritm
 
     def forward(request, response)
       intercept_request(@request_interceptor, request)
-
       faraday_response = faraday_forward request
       to_webrick_response faraday_response, response
       intercept_response(@response_interceptor, request, response)
@@ -41,38 +40,19 @@ module Ritm
       @client.send req_method do |req|
         req.url request.request_uri
         req.body = request.body
-        add_request_headers(req, request)
+        request.header.each do |name, value|
+          req.headers[name] = value
+        end
       end
-    end
-
-    def add_request_headers(faraday_request, webrick_request)
-      webrick_request.header.each do |name, value|
-        faraday_request.headers[name] = value unless strip?(name, Ritm.conf.misc.strip_request_headers)
-      end
-      Ritm.conf.misc.add_request_headers.each { |k, v| faraday_request.headers[k] = v }
     end
 
     def to_webrick_response(faraday_response, webrick_response)
       webrick_response.status = faraday_response.status
       webrick_response.body = faraday_response.body
       faraday_response.headers.each do |name, value|
-        webrick_response[name] = value unless strip?(name, Ritm.conf.misc.strip_response_headers)
+        webrick_response[name] = value
       end
-      Ritm.conf.misc.add_response_headers.each { |k, v| webrick_response[k] = v }
       webrick_response
-    end
-
-    def strip?(header, rules)
-      header = header.to_s.downcase
-      rules.each do |rule|
-        case rule
-        when String
-          return true if header == rule
-        when Regexp
-          return true if header =~ rule
-        end
-      end
-      false
     end
   end
 end

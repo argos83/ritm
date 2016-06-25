@@ -93,7 +93,7 @@ RSpec.describe Ritm do
         client(base_url).get('/ping')
         res = interceptor.responses.last
         expect(res.status).to be(200)
-        expect(res.header['content-length']).to be(4)
+        expect(res.header['content-length']).to eq('4')
         expect(res.header['content-type']).to eq('text/html;charset=utf-8')
         expect(res.body).to eq('pong')
       end

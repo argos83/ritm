@@ -41,8 +41,8 @@ module Ritm
 
       def context_with_cert(original_ctx, cert)
         ctx = original_ctx.dup
-        ctx.key = OpenSSL::PKey::RSA.new(cert.private_key)
-        ctx.cert = OpenSSL::X509::Certificate.new(cert.pem)
+        ctx.key = cert.private_key
+        ctx.cert = cert.x509
         ctx
       end
     end

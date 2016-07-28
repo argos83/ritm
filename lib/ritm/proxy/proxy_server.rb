@@ -19,8 +19,7 @@ module Ritm
       # Override
       # Patches the destination address on HTTPS connections to go via the HTTPS Reverse Proxy
       def do_CONNECT(req, res)
-        req.class.send(:attr_accessor, :unparsed_uri)
-        req.unparsed_uri = @config[:https_forward]
+        req.unparsed_uri = @config[:https_forward] unless ssl_pass_through? req.unparsed_uri
         super
       end
 
@@ -43,6 +42,20 @@ module Ritm
 
         # Response modifier handler
         intercept_response(@config[:response_interceptor], req, res)
+      end
+
+      private
+
+      def ssl_pass_through?(destination)
+        Ritm.conf.misc.ssl_pass_through.each do |matcher|
+          case matcher
+          when String
+            return true if destination == matcher
+          when Regexp
+            return true if destination =~ matcher
+          end
+        end
+        false
       end
     end
   end

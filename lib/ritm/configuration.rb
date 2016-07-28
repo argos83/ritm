@@ -18,6 +18,7 @@ module Ritm
           key: nil
         }
       },
+
       intercept: {
         enabled: true,
         request: {
@@ -33,7 +34,12 @@ module Ritm
           update_content_length: true
         },
         process_chunked_encoded_transfer: true
+      },
+
+      misc: {
+        ssl_pass_through: []
       }
+
     }.freeze
 
     def initialize(settings = {})
@@ -46,7 +52,15 @@ module Ritm
     end
 
     def method_missing(m, *args, &block)
-      @settings.send(m, *args, &block)
+      if @settings.respond_to?(m)
+        @settings.send(m, *args, &block)
+      else
+        super
+      end
+    end
+
+    def respond_to_missing?(method_name, _include_private = false)
+      @settings.respond_to?(method_name) || super
     end
 
     # Re-enable interception

@@ -52,7 +52,15 @@ module Ritm
     end
 
     def method_missing(m, *args, &block)
-      @settings.send(m, *args, &block)
+      if @settings.respond_to?(m)
+        @settings.send(m, *args, &block)
+      else
+        super
+      end
+    end
+
+    def respond_to_missing?(method_name, _include_private = false)
+      @settings.respond_to?(method_name) || super
     end
 
     # Re-enable interception

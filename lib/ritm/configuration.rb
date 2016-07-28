@@ -18,6 +18,7 @@ module Ritm
           key: nil
         }
       },
+
       intercept: {
         enabled: true,
         request: {
@@ -33,7 +34,12 @@ module Ritm
           update_content_length: true
         },
         process_chunked_encoded_transfer: true
+      },
+
+      misc: {
+        ssl_pass_through: []
       }
+
     }.freeze
 
     def initialize(settings = {})

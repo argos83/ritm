@@ -13,9 +13,10 @@ RSpec.describe Ritm do
 
   before(:each) do
     interceptor.clear
+    Ritm.conf.misc.ssl_pass_through.clear
   end
 
-  it 'self-signs certificates that not supported by default' do
+  it 'self-signs certificates that are not supported by default' do
     expect { client(base_url, verify_ssl: true).get('/ping') }.to raise_error(Faraday::SSLError)
   end
 
@@ -58,5 +59,23 @@ RSpec.describe Ritm do
     end
 
     expect(issuer1).not_to eq(issuer2)
+  end
+
+  it 'bypasses proxy if server address matches a pass-through string setting' do
+    Ritm.conf.misc.ssl_pass_through << '127.0.0.1.xip.io:4443'
+    client(base_url).get('/ping')
+    expect(interceptor.requests.size).to be 0
+  end
+
+  it 'bypasses proxy if server address matches a pass-through regex setting' do
+    Ritm.conf.misc.ssl_pass_through << /.+:4443/
+    client(base_url).get('/ping')
+    expect(interceptor.requests.size).to be 0
+  end
+
+  it ' does not bypass proxy if server address no pass-through settings are matched' do
+    Ritm.conf.misc.ssl_pass_through.concat [/.+:4444/, '127.0.0.2.xip.io:4443', /.*ioa:4443/]
+    client(base_url).get('/ping')
+    expect(interceptor.requests.size).to be 1
   end
 end

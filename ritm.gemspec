@@ -24,4 +24,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sinatra', '~> 1.4'
   s.add_development_dependency 'thin', '~> 1.6'
   s.add_development_dependency 'rake', '~> 11.1'
+  s.add_development_dependency 'httpclient', '~> 2.8'
 end

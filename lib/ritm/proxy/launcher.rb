@@ -8,9 +8,9 @@ module Ritm
     # Launches the Proxy server and the SSL Reverse Proxy with the given settings
     class Launcher
       # By default settings are read from Ritm::Configuration but you can override some via these named arguments:
+      #   interface [String]: the host/address to bind the main proxy
       #   proxy_port [Fixnum]: the port where the main proxy listens (the one to be configured in the client)
       #   ssl_reverse_proxy_port [Fixnum]: the port where the reverse proxy for ssl traffic interception listens
-      #   interface [String]: the host/address to bind the main proxy
       #   ca_crt_path [String]: the path to the certification authority certificate
       #   ca_key_path [String]: the path to the certification authority private key
       #   request_interceptor [Proc |request|]: the handler for request interception

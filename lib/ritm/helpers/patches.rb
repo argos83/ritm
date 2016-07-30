@@ -1,9 +1,14 @@
+require 'openssl'
 require 'webrick'
 require 'webrick/httpproxy'
 require 'ritm/helpers/utils'
 
 # Patch WEBrick too short max uri length
 Ritm::Utils.silence_warnings { WEBrick::HTTPRequest::MAX_URI_LENGTH = 4000 }
+
+# Digest::Digest is deprecated. This has been fixed in certificate_authority master
+# but the project is no longer maintained and the fixed version was never published
+Ritm::Utils.silence_warnings { OpenSSL::Digest::Digest = OpenSSL::Digest }
 
 # Make request method writable
 WEBrick::HTTPRequest.instance_eval { attr_accessor :request_method, :unparsed_uri }

@@ -22,7 +22,8 @@ module Ritm
       # TODO: make SSL verification a configuration setting
       @client = Faraday.new(ssl: { verify: false }) do |conn|
         conn.adapter :net_http
-        # TODO: support customizations (e.g. upstream proxies or different adapters)
+        proxy = Ritm.conf.misc.upstream_proxy
+        conn.proxy proxy unless proxy.nil?
       end
     end
 

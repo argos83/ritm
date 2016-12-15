@@ -44,6 +44,17 @@ module Ritm
         intercept_response(@config[:response_interceptor], req, res)
       end
 
+      # Override
+      def proxy_uri(req, _res)
+        if req.request_method == 'CONNECT'
+          # Let reverse the reverse proxy handle upstream proxies for https
+          nil
+        else
+          proxy = Ritm.conf.misc.upstream_proxy
+          proxy.nil? ? nil : URI.parse(proxy)
+        end
+      end
+
       private
 
       def ssl_pass_through?(destination)

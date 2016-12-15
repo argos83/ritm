@@ -37,7 +37,8 @@ module Ritm
       },
 
       misc: {
-        ssl_pass_through: []
+        ssl_pass_through: [],
+        upstream_proxy: nil
       }
 
     }.freeze
@@ -61,6 +62,10 @@ module Ritm
 
     def respond_to_missing?(method_name, _include_private = false)
       @settings.respond_to?(method_name) || super
+    end
+
+    def upstream_proxy(proxy)
+      @settings.misc[:upstream_proxy] = proxy
     end
 
     # Re-enable interception

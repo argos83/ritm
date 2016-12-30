@@ -7,20 +7,23 @@ def test_path(path)
   File.join(File.dirname(__FILE__), path)
 end
 
-proxy = Ritm::Proxy::Launcher.new ca_crt_path: test_path('resources/insecure_ca.crt'),
-                                  ca_key_path: test_path('resources/insecure_ca.priv')
+Ritm.configure do
+  ssl_reverse_proxy.ca[:pem] = test_path('resources/insecure_ca.crt')
+  ssl_reverse_proxy.ca[:key] = test_path('resources/insecure_ca.priv')
+end
+
 http_pid = nil
 https_pid = nil
 
 RSpec.configure do |c|
   c.before(:suite) do
-    proxy.start
+    Ritm.start
     http_pid = fork { WebServer.run! }
     https_pid = fork { SslWebServer.run! }
     Thread.pass
   end
   c.after(:suite) do
-    proxy.shutdown
+    Ritm.shutdown
     Process.kill('INT', http_pid)
     Process.kill('INT', https_pid)
   end

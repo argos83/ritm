@@ -16,21 +16,22 @@ module Ritm
   class HTTPForwarder
     include InterceptUtils
 
-    def initialize(request_interceptor, response_interceptor)
+    def initialize(request_interceptor, response_interceptor, context_config)
       @request_interceptor = request_interceptor
       @response_interceptor = response_interceptor
+      @config = context_config
       # TODO: make SSL verification a configuration setting
       @client = Faraday.new(ssl: { verify: false }) do |conn|
         conn.adapter :net_http
-        # TODO: support customizations (e.g. upstream proxies or different adapters)
+        conn.proxy @config.misc.upstream_proxy unless @config.misc.upstream_proxy.nil?
       end
     end
 
     def forward(request, response)
-      intercept_request(@request_interceptor, request)
+      intercept_request(@request_interceptor, request, @config.intercept.request)
       faraday_response = faraday_forward request
       to_webrick_response faraday_response, response
-      intercept_response(@response_interceptor, request, response)
+      intercept_response(@response_interceptor, request, response, @config.intercept.response)
     end
 
     private

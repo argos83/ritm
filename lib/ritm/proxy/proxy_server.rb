@@ -30,7 +30,7 @@ module Ritm
         proxy_auth(req, res)
 
         # Request modifier handler
-        intercept_request(@config[:request_interceptor], req)
+        intercept_request(@config[:request_interceptor], req, @config[:ritm_conf].intercept.request)
 
         begin
           send("do_#{req.request_method}", req, res)
@@ -41,13 +41,24 @@ module Ritm
         end
 
         # Response modifier handler
-        intercept_response(@config[:response_interceptor], req, res)
+        intercept_response(@config[:response_interceptor], req, res, @config[:ritm_conf].intercept.response)
+      end
+
+      # Override
+      def proxy_uri(req, _res)
+        if req.request_method == 'CONNECT'
+          # Let the reverse proxy handle upstream proxies for https
+          nil
+        else
+          proxy = @config[:ritm_conf].misc.upstream_proxy
+          proxy.nil? ? nil : URI.parse(proxy)
+        end
       end
 
       private
 
       def ssl_pass_through?(destination)
-        Ritm.conf.misc.ssl_pass_through.each do |matcher|
+        @config[:ritm_conf].misc.ssl_pass_through.each do |matcher|
           case matcher
           when String
             return true if destination == matcher

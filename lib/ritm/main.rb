@@ -1,38 +1,18 @@
+require 'ritm/session'
+
 # Main module
 module Ritm
-  # Define global settings
-  def self.configure(&block)
-    conf.instance_eval(&block)
+  GLOBAL_SESSION = Session.new
+
+  def self.method_missing(m, *args, &block)
+    if GLOBAL_SESSION.respond_to?(m)
+      GLOBAL_SESSION.send(m, *args, &block)
+    else
+      super
+    end
   end
 
-  # Re-enable fuzzing (if it was disabled)
-  def self.enable
-    conf.enable
-  end
-
-  # Disable fuzzing (if it was enabled)
-  def self.disable
-    conf.disable
-  end
-
-  # Access the current config settings
-  def self.conf
-    @configuration ||= Configuration.new
-  end
-
-  def self.dispatcher
-    @dispatcher ||= Dispatcher.new
-  end
-
-  def self.add_handler(handler)
-    dispatcher.add_handler(handler)
-  end
-
-  def self.on_request(&block)
-    dispatcher.on_request(&block)
-  end
-
-  def self.on_response(&block)
-    dispatcher.on_response(&block)
+  def self.respond_to_missing?(method_name, _include_private = false)
+    GLOBAL_SESSION.respond_to?(method_name) || super
   end
 end

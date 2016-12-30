@@ -1,5 +1,2 @@
 require 'ritm/version'
-require 'ritm/dispatcher'
-require 'ritm/configuration'
 require 'ritm/main'
-require 'ritm/proxy/launcher'

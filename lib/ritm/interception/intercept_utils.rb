@@ -3,18 +3,18 @@ require 'ritm/helpers/encodings'
 module Ritm
   # Interceptor callbacks calling logic shared by the HTTP Proxy Server and the SSL Reverse Proxy Server
   module InterceptUtils
-    def intercept_request(handler, request)
+    def intercept_request(handler, request, intercept_request_settings)
       return if handler.nil?
-      preprocess(request, Ritm.conf.intercept.request)
+      preprocess(request, intercept_request_settings)
       handler.call(request)
-      postprocess(request, Ritm.conf.intercept.request)
+      postprocess(request, intercept_request_settings)
     end
 
-    def intercept_response(handler, request, response)
+    def intercept_response(handler, request, response, intercept_response_settings)
       return if handler.nil?
-      preprocess(response, Ritm.conf.intercept.response)
+      preprocess(response, intercept_response_settings)
       handler.call(request, response)
-      postprocess(response, Ritm.conf.intercept.response)
+      postprocess(response, intercept_response_settings)
     end
 
     private

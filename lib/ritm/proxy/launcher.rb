@@ -7,19 +7,10 @@ module Ritm
   module Proxy
     # Launches the Proxy server and the SSL Reverse Proxy with the given settings
     class Launcher
-      # By default settings are read from Ritm::Configuration but you can override some via these named arguments:
-      #   interface [String]: the host/address to bind the main proxy
-      #   proxy_port [Fixnum]: the port where the main proxy listens (the one to be configured in the client)
-      #   ssl_reverse_proxy_port [Fixnum]: the port where the reverse proxy for ssl traffic interception listens
-      #   ca_crt_path [String]: the path to the certification authority certificate
-      #   ca_key_path [String]: the path to the certification authority private key
-      #   request_interceptor [Proc |request|]: the handler for request interception
-      #   response_interceptor [Proc |request, response|]: the handler for response interception
-      def initialize(**args)
-        build_settings(**args)
-
-        build_reverse_proxy(@ssl_proxy_host, @ssl_proxy_port, @request_interceptor, @response_interceptor)
-        build_proxy(@proxy_host, @proxy_port, @https_forward, @request_interceptor, @response_interceptor)
+      def initialize(session)
+        build_settings(session)
+        build_reverse_proxy
+        build_proxy
       end
 
       # Starts the service (non blocking)
@@ -36,36 +27,37 @@ module Ritm
 
       private
 
-      def build_settings(**args)
-        c = Ritm.conf
-        @proxy_host = args.fetch(:interface, c.proxy.bind_address)
-        @proxy_port = args.fetch(:proxy_port, c.proxy.bind_port)
-        @ssl_proxy_host = c.ssl_reverse_proxy.bind_address
-        @ssl_proxy_port = args.fetch(:ssl_reverse_proxy_port, c.ssl_reverse_proxy.bind_port)
-        @https_forward = "#{@ssl_proxy_host}:#{@ssl_proxy_port}"
-        @request_interceptor = args[:request_interceptor] || DEFAULT_REQUEST_HANDLER
-        @response_interceptor = args[:response_interceptor] || DEFAULT_RESPONSE_HANDLER
+      def build_settings(session)
+        @conf = session.conf
+        ssl_proxy_host = @conf.ssl_reverse_proxy.bind_address
+        ssl_proxy_port = @conf.ssl_reverse_proxy.bind_port
+        @https_forward = "#{ssl_proxy_host}:#{ssl_proxy_port}"
+        @request_interceptor = default_request_handler(session)
+        @response_interceptor = default_response_handler(session)
 
-        crt_path = args.fetch(:ca_crt_path, c.ssl_reverse_proxy.ca.pem)
-        key_path = args.fetch(:ca_key_path, c.ssl_reverse_proxy.ca.key)
+        crt_path = @conf.ssl_reverse_proxy.ca.pem
+        key_path = @conf.ssl_reverse_proxy.ca.key
         @certificate = ca_certificate(crt_path, key_path)
       end
 
-      def build_proxy(host, port, https_forward_to, req_intercept, res_intercept)
-        @http = Ritm::Proxy::ProxyServer.new(Port: port,
+      def build_proxy
+        @http = Ritm::Proxy::ProxyServer.new(BindAddress: @conf.proxy.bind_address,
+                                             Port: @conf.proxy.bind_port,
                                              AccessLog: [],
-                                             BindAddress: host,
                                              Logger: WEBrick::Log.new(File.open(File::NULL, 'w')),
-                                             https_forward: https_forward_to,
+                                             https_forward: @https_forward,
                                              ProxyVia: nil,
-                                             request_interceptor: req_intercept,
-                                             response_interceptor: res_intercept)
+                                             request_interceptor: @request_interceptor,
+                                             response_interceptor: @response_interceptor,
+                                             ritm_conf: @conf)
       end
 
-      def build_reverse_proxy(_host, port, req_intercept, res_intercept)
-        @https = Ritm::Proxy::SSLReverseProxy.new(port, @certificate,
-                                                  request_interceptor: req_intercept,
-                                                  response_interceptor: res_intercept)
+      def build_reverse_proxy
+        @https = Ritm::Proxy::SSLReverseProxy.new(@conf.ssl_reverse_proxy.bind_port,
+                                                  @certificate,
+                                                  @conf,
+                                                  request_interceptor: @request_interceptor,
+                                                  response_interceptor: @response_interceptor)
       end
 
       def ca_certificate(pem, key)

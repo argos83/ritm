@@ -49,6 +49,7 @@ RSpec.describe Ritm do
 
   it 'generates a new CA if it was not specified' do
     issuer1 = issuer2 = nil
+
     with_proxy(proxy_port: 6666, ssl_reverse_proxy_port: 6667) do
       cert = server_cert_for_url(base_url, proxy: 'http://localhost:6666')
       issuer1 = cert.extensions.find { |e| e.oid == 'authorityKeyIdentifier' }.value

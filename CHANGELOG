@@ -1,0 +1,6 @@
+1.0.0
+    * Support upstream proxy configuration
+    * Allow multiple sessions to coexist vs a statically configured session
+
+0.1.0
+    * First version

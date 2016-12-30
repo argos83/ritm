@@ -13,7 +13,7 @@ module Ritm
       # @param ca [Ritm::CA]: The certificate authority used to sign fake server certificates
       # @param request_interceptor [Proc]: If given, it will be invoked before proxying the request
       # @param response_interceptor [Proc]: If give, it will be invoked before sending back the response
-      def initialize(port, ca, request_interceptor: nil, response_interceptor: nil)
+      def initialize(port, ca, conf, request_interceptor: nil, response_interceptor: nil)
         @ca = ca
         default_vhost = 'localhost'
         @server = CertSigningHTTPSServer.new(Port: port,
@@ -22,7 +22,7 @@ module Ritm
                                              ca: ca,
                                              **vhost_settings(default_vhost))
 
-        @server.mount '/', RequestInterceptorServlet, request_interceptor, response_interceptor
+        @server.mount '/', RequestInterceptorServlet, request_interceptor, response_interceptor, conf
       end
 
       def start_async

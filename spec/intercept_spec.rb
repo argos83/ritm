@@ -33,6 +33,23 @@ RSpec.describe Ritm do
       expect(interceptor.responses.size).to be 1
     end
 
+    it 'can be configured to use upstream proxies' do
+      resp = nil
+      with_proxy do |session|
+        c = client(base_url, verify_ssl: false, proxy: 'http://localhost:7777')
+        c.get('/ping')
+        expect(interceptor.requests.size).to be 0
+        expect(interceptor.responses.size).to be 0
+
+        session.configure { misc[:upstream_proxy] = DEFAULT_PROXY_ADDRESS }
+
+        resp = c.get('/ping')
+        expect(interceptor.requests.size).to be 1
+        expect(interceptor.responses.size).to be 1
+      end
+      expect(resp.body).to eq 'pong'
+    end
+
     describe 'when intercepting requests' do
       it 'intercepts requests before they are sent' do
         exec_order = [:a]

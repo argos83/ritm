@@ -1,10 +1,12 @@
 
-dispatcher = Ritm.dispatcher
-
-DEFAULT_REQUEST_HANDLER = proc do |req|
-  dispatcher.notify_request(req) if Ritm.conf.intercept.enabled
+def default_request_handler(session)
+  proc do |req|
+    session.dispatcher.notify_request(req) if session.conf.intercept.enabled
+  end
 end
 
-DEFAULT_RESPONSE_HANDLER = proc do |req, res|
-  dispatcher.notify_response(req, res) if Ritm.conf.intercept.enabled
+def default_response_handler(session)
+  proc do |req, res|
+    session.dispatcher.notify_response(req, res) if session.conf.intercept.enabled
+  end
 end

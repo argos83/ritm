@@ -23,7 +23,7 @@ module Ritm
       # TODO: make SSL verification a configuration setting
       @client = Faraday.new(ssl: { verify: false }) do |conn|
         conn.adapter :net_http
-        conn.proxy @config.misc.upstream_proxy unless @config.misc.upstream_proxy.nil?
+        conn.proxy = @config.misc.upstream_proxy unless @config.misc.upstream_proxy.nil?
       end
     end
 

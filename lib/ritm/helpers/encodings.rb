@@ -3,7 +3,7 @@ require 'zlib'
 module Ritm
   # ENCODER/DECODER of HTTP content
   module Encodings
-    ENCODINGS = [:identity, :gzip, :deflate].freeze
+    ENCODINGS = %i[identity gzip deflate].freeze
 
     def self.encode(encoding, data)
       case encoding

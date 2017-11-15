@@ -1,6 +1,9 @@
+require 'openssl'
 require 'webrick'
 require 'webrick/https'
 require 'ritm/certs/certificate'
+
+IS_RUBY_2_4_OR_OLDER = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.4')
 
 module Ritm
   module Proxy
@@ -40,9 +43,22 @@ module Ritm
       end
 
       def context_with_cert(original_ctx, cert)
-        ctx = original_ctx.dup
+        ctx = duplicate_context(original_ctx)
         ctx.key = cert.private_key
         ctx.cert = cert.x509
+        ctx
+      end
+
+      def duplicate_context(original_ctx)
+        return original_ctx.dup unless IS_RUBY_2_4_OR_OLDER
+
+        ctx = OpenSSL::SSL::SSLContext.new
+
+        original_ctx.instance_variables.each do |variable_name|
+          prop_name = variable_name.to_s.sub(/^@/, '')
+          set_prop_method = "#{prop_name}="
+          ctx.send(set_prop_method, original_ctx.send(prop_name)) if ctx.respond_to? set_prop_method
+        end
         ctx
       end
     end

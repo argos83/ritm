@@ -54,7 +54,7 @@ class WebServer < Sinatra::Base
     Zlib::Deflate.deflate('Misunderstanding all you see')
   end
 
-  [:get, :post, :put, :patch, :delete, :options].each do |method|
+  %i[get post put patch delete options].each do |method|
     send(method, '/echo') do
       request.body.rewind
       info = { method: request.request_method,

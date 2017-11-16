@@ -14,7 +14,7 @@ module RitmSpecUtils
       conn.adapter :net_http
       conn.ssl[:verify] = verify_ssl
       conn.ssl[:ca_file] = ca_file unless ca_file.nil?
-      conn.proxy proxy
+      conn.proxy = proxy
     end
   end
 

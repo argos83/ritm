@@ -43,8 +43,8 @@ RSpec.describe Ritm do
     expect(extensions['basicConstraints']).to eq('CA:FALSE')
     # Issuer
     expect(extensions['authorityKeyIdentifier'])
-      .to eq("keyid:DF:54:83:59:A4:73:F7:F6:A1:4A:CC:CD:3B:CE:3F:A5:4D:8A:4D:D6\n")
-    expect(cert.issuer.to_s).to eq('/CN=RubyInTheMiddle')
+      .to eq("keyid:B1:7B:8A:53:DB:01:1B:F1:51:03:61:AC:21:C7:36:D7:CE:15:BD:08\n")
+    expect(cert.issuer.to_s).to eq('/CN=RubyInTheMiddle/O=RubyInTheMiddle/OU=RubyInTheMiddle/C=AR')
   end
 
   it 'generates a new CA if it was not specified' do

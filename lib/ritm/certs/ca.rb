@@ -28,14 +28,14 @@ module Ritm
     def self.signing_profile
       {
         'extensions' => {
-          'keyUsage' => { 'usage' => %w(keyEncipherment digitalSignature) },
-          'extendedKeyUsage' => { 'usage' => %w(serverAuth clientAuth) }
+          'keyUsage' => { 'usage' => %w[keyEncipherment digitalSignature] },
+          'extendedKeyUsage' => { 'usage' => %w[serverAuth clientAuth] }
         }
       }
     end
 
     def self.ca_signing_profile
-      { 'extensions' => { 'keyUsage' => { 'usage' => %w(critical keyCertSign keyEncipherment digitalSignature) } } }
+      { 'extensions' => { 'keyUsage' => { 'usage' => %w[critical keyCertSign keyEncipherment digitalSignature] } } }
     end
   end
 end

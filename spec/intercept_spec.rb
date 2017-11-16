@@ -7,30 +7,30 @@ require 'helpers/ritm_spec_utils'
 RSpec.describe Ritm do
   include RitmSpecUtils
 
-  %w(http://localhost:4567 https://localhost:4443).each do |base_url|
+  %w[http://localhost:4567 https://localhost:4443].each do |base_url|
     before(:each) do
       interceptor.clear
     end
 
     it 'intercepts requests and responses' do
-      expect(interceptor.requests.size).to be 0
-      expect(interceptor.responses.size).to be 0
+      expect(interceptor.requests.size).to eq 0
+      expect(interceptor.responses.size).to eq 0
       client(base_url).get('/ping')
-      expect(interceptor.requests.size).to be 1
-      expect(interceptor.responses.size).to be 1
+      expect(interceptor.requests.size).to eq 1
+      expect(interceptor.responses.size).to eq 1
     end
 
     it 'can disable interception temporarily' do
-      expect(interceptor.requests.size).to be 0
-      expect(interceptor.responses.size).to be 0
+      expect(interceptor.requests.size).to eq 0
+      expect(interceptor.responses.size).to eq 0
       Ritm.disable
       client(base_url).get('/ping')
-      expect(interceptor.requests.size).to be 0
-      expect(interceptor.responses.size).to be 0
+      expect(interceptor.requests.size).to eq 0
+      expect(interceptor.responses.size).to eq 0
       Ritm.enable
       client(base_url).get('/ping')
-      expect(interceptor.requests.size).to be 1
-      expect(interceptor.responses.size).to be 1
+      expect(interceptor.requests.size).to eq 1
+      expect(interceptor.responses.size).to eq 1
     end
 
     it 'can be configured to use upstream proxies' do
@@ -38,14 +38,14 @@ RSpec.describe Ritm do
       with_proxy do |session|
         c = client(base_url, verify_ssl: false, proxy: 'http://localhost:7777')
         c.get('/ping')
-        expect(interceptor.requests.size).to be 0
-        expect(interceptor.responses.size).to be 0
+        expect(interceptor.requests.size).to eq 0
+        expect(interceptor.responses.size).to eq 0
 
         session.configure { misc[:upstream_proxy] = DEFAULT_PROXY_ADDRESS }
 
         resp = c.get('/ping')
-        expect(interceptor.requests.size).to be 1
-        expect(interceptor.responses.size).to be 1
+        expect(interceptor.requests.size).to eq 1
+        expect(interceptor.responses.size).to eq 1
       end
       expect(resp.body).to eq 'pong'
     end
@@ -59,7 +59,7 @@ RSpec.describe Ritm do
         exec_order << :b
         client(base_url).get('/ping')
         exec_order << :d
-        expect(exec_order).to eq([:a, :b, :c, :d])
+        expect(exec_order).to eq(%i[a b c d])
       end
 
       it 'gets access to method, resource, headers, and body' do
@@ -103,13 +103,13 @@ RSpec.describe Ritm do
         exec_order << :b
         client(base_url).get('/ping')
         exec_order << :d
-        expect(exec_order).to eq([:a, :b, :c, :d])
+        expect(exec_order).to eq(%i[a b c d])
       end
 
       it 'gets access to status, headers, and body' do
         client(base_url).get('/ping')
         res = interceptor.responses.last
-        expect(res.status).to be(200)
+        expect(res.status).to eq 200
         expect(res.header['content-length']).to eq('4')
         expect(res.header['content-type']).to eq('text/html;charset=utf-8')
         expect(res.body).to eq('pong')
@@ -123,7 +123,7 @@ RSpec.describe Ritm do
           res.header['content-type'] = 'text/plain'
         end
         res = client(base_url).get('/ping')
-        expect(res.status).to be(404)
+        expect(res.status).to eq 404
         expect(res.headers['content-length']).to eq('6')
         expect(res.headers['content-type']).to eq('text/plain')
         expect(res.headers['x-custom']).to eq('narf')

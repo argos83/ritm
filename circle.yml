@@ -1,7 +1,16 @@
 machine:
   ruby:
-    version: 2.2.3
+    version: 2.2.8
+
+dependencies:
+  override:
+    - 'rvm-exec 2.2.8 bundle install'
+    - 'rvm-exec 2.3.5 bundle install'
+    - 'rvm-exec 2.4.2 bundle install'
+
 test:
-  post:
-    - bundle exec rspec
-    - bundle exec rubocop
+  override:
+    - 'rvm-exec 2.2.8 bundle exec rspec'
+    - 'rvm-exec 2.3.5 bundle exec rspec'
+    - 'rvm-exec 2.4.2 bundle exec rspec'
+    - 'rvm-exec 2.4.2 bundle exec rubocop'

@@ -13,11 +13,12 @@ module Ritm
       new cert
     end
 
-    def self.create(common_name, serial_number: nil)
+    def self.create(common_name, ca: nil, serial_number: nil)
       cert = CertificateAuthority::Certificate.new
       cert.subject.common_name = common_name
-      cert.subject.organization = cert.subject.organizational_unit = 'RubyInTheMiddle'
-      cert.subject.country = 'AR'
+      cert.subject.organization = ca.cert.distinguished_name.organization || 'RubyInTheMiddle'
+      cert.subject.organizational_unit = ca.cert.distinguished_name.organization || 'RubyInTheMiddle'
+      cert.subject.country = ca.cert.distinguished_name.country || 'AR'
       cert.not_before = cert.not_before - 3600 * 24 * 30 # Substract 30 days
       cert.serial_number.number = serial_number || common_name.hash.abs
       cert.key_material.generate_key(1024)

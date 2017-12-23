@@ -33,7 +33,7 @@ module Ritm
         ctx.servername_cb = proc do |sock, servername|
           mutex.synchronize do
             unless contexts.include? servername
-              cert = Ritm::Certificate.create(servername)
+              cert = Ritm::Certificate.create(servername, ca: ca)
               ca.sign(cert)
               contexts[servername] = context_with_cert(sock.context, cert)
             end

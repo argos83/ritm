@@ -38,7 +38,7 @@ module Ritm
       private
 
       def gen_signed_cert(common_name)
-        cert = Ritm::Certificate.create(common_name)
+        cert = Ritm::Certificate.create(common_name, ca: @ca)
         @ca.sign(cert)
         cert
       end

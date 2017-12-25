@@ -94,6 +94,28 @@ RSpec.describe Ritm do
         # TODO: implement changing host:port when intercepting
         # expect(res[:headers][:host]).to eq('127.0.0.1.xip.io:4567')
       end
+
+      describe 'content-length' do
+        it 'should update content-length automatically by default' do
+          interceptor.on_request = proc { |req| req.body = '123' }
+          response = client(base_url).post('/echo') { |req| req.body = '1234567890' }
+          received_request = JSON.parse(response.body, symbolize_names: true)
+          expect(received_request[:headers][:'content-length']).to eq('3')
+        end
+
+        it 'should not update the content-length when disabled' do
+          skip 'Net:HTTP seems to always update content-length'
+
+          with_proxy do |session|
+            c = client(base_url, verify_ssl: false, proxy: 'http://localhost:7777')
+            session.configure { intercept[:request][:update_content_length] = false }
+            session.on_request { |req| req.body = '123' }
+            response = c.post('/echo') { |req| req.body = '1234567890' }
+            received_request = JSON.parse(response.body, symbolize_names: true)
+            expect(received_request[:headers][:'content-length']).to eq('10')
+          end
+        end
+      end
     end
 
     describe 'when intercepting responses' do
@@ -130,24 +152,53 @@ RSpec.describe Ritm do
         expect(res.body).to eq('plonch')
       end
 
-      it 'gets gzip content automatically decoded' do
-        content = nil
-        interceptor.on_response = proc do |_req, res|
-          expect(res.header['content-encoding']).to be nil
-          content = res.body
+      describe 'gzip/deflate content encoding' do
+        it 'gets gzip content automatically decoded' do
+          content = nil
+          interceptor.on_response = proc do |_req, res|
+            expect(res.header['content-encoding']).to be nil
+            content = res.body
+          end
+          client(base_url).get('/encoded/gzip', payload: 'The gzip payload')
+          expect(content).to eq 'The gzip payload'
         end
-        client(base_url).get('/encoded/gzip')
-        expect(content).to eq 'Living is easy with eyes closed'
+
+        it 'gets deflate content automatically decoded' do
+          content = nil
+          interceptor.on_response = proc do |_req, res|
+            expect(res.header['content-encoding']).to be nil
+            content = res.body
+          end
+          client(base_url).get('/encoded/deflate', payload: 'the deflate payload')
+          expect(content).to eq 'the deflate payload'
+        end
       end
 
-      it 'gets deflate content automatically decoded' do
-        content = nil
-        interceptor.on_response = proc do |_req, res|
-          expect(res.header['content-encoding']).to be nil
-          content = res.body
+      describe 'content-length' do
+        it 'should update content-length automatically by default' do
+          interceptor.on_response = proc { |_req, res| res.body = '1234567890' }
+          response = client(base_url).get('/ping')
+          expect(response.headers['content-length']).to eq('10')
         end
-        client(base_url).get('/encoded/deflate')
-        expect(content).to eq 'Misunderstanding all you see'
+
+        it 'should not update the content-length when disabled' do
+          with_proxy do |session|
+            session.configure { intercept[:response][:update_content_length] = false }
+            session.on_response { |_req, res| res.body = '1234567890' }
+            response = client(
+              base_url,
+              verify_ssl: false,
+              proxy: 'http://localhost:7777'
+            ).get('/ping')
+            expect(response.headers['content-length']).to eq('4')
+          end
+        end
+
+        it 'should update the content-length with the proper size in bytes' do
+          interceptor.on_response = proc { |_req, res| res.body = "\x80\u3042\u3042" }
+          response = client(base_url).get('/ping')
+          expect(response.headers['content-length']).to eq('7')
+        end
       end
     end
   end

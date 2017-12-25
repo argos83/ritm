@@ -42,7 +42,7 @@ class WebServer < Sinatra::Base
     StringIO.new.tap do |io|
       gz = Zlib::GzipWriter.new(io)
       begin
-        gz.write('Living is easy with eyes closed')
+        gz.write(params[:payload])
       ensure
         gz.close
       end
@@ -51,7 +51,7 @@ class WebServer < Sinatra::Base
 
   get '/encoded/deflate' do
     headers['Content-Encoding'] = 'deflate'
-    Zlib::Deflate.deflate('Misunderstanding all you see')
+    Zlib::Deflate.deflate(params[:payload])
   end
 
   %i[get post put patch delete options].each do |method|

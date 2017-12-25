@@ -1,3 +1,9 @@
+1.0.2
+	* Fix response content-length calculation
+
+1.0.1
+	* Support for Ruby 2.4
+
 1.0.0
     * Support upstream proxy configuration
     * Allow multiple sessions to coexist vs a statically configured session

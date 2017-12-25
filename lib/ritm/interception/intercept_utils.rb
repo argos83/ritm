@@ -28,7 +28,7 @@ module Ritm
     end
 
     def postprocess(req_res, settings)
-      header_obj(req_res)['content-length'] = (req_res.body || '').size.to_s if settings.update_content_length
+      header_obj(req_res)['content-length'] = (req_res.body || '').bytesize.to_s if settings.update_content_length
     end
 
     def chunked?(headers)
@@ -59,9 +59,11 @@ module Ritm
     def decode(req_res)
       encoding = content_encoding(req_res)
       return if encoding == :identity
+
       req_res.body = Encodings.decode(encoding, req_res.body)
-      _content_encoding = req_res.header.delete('content-encoding')
-      header_obj(req_res)['content-length'] = (req_res.body || '').size.to_s
+      req_res.header.delete('content-encoding')
+      headers = header_obj(req_res)
+      headers['content-length'] = (req_res.body || '').bytesize.to_s
     end
 
     def strip?(header, rules)

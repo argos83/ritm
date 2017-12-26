@@ -1,6 +1,7 @@
 require 'json'
 require 'thin'
 require 'sinatra/base'
+require 'sinatra/cookies'
 
 class ThinHttpsBackend < Thin::Backends::TcpServer
   def initialize(host, port, ssl_options)
@@ -11,6 +12,7 @@ class ThinHttpsBackend < Thin::Backends::TcpServer
 end
 
 class WebServer < Sinatra::Base
+  helpers Sinatra::Cookies
   set :environment, :test
   set :server, :thin
   set :bind, '127.0.0.1'
@@ -35,6 +37,10 @@ class WebServer < Sinatra::Base
 
   get '/ping' do
     'pong'
+  end
+
+  get '/cookies' do
+    params.each { |name, value| response.set_cookie(name, value: value, expires: Time.now + 3600) }
   end
 
   get '/encoded/gzip' do

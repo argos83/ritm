@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.7'
   s.add_development_dependency 'rubocop', '~> 0.51'
   s.add_development_dependency 'simplecov', '~> 0.15'
-  s.add_development_dependency 'sinatra', '~> 1.4'
+  s.add_development_dependency 'sinatra', '~> 2.0'
+  s.add_development_dependency 'sinatra-contrib', '~> 2.0'
   s.add_development_dependency 'thin', '~> 1.7'
 end

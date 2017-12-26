@@ -2,6 +2,7 @@ require 'ritm/proxy/ssl_reverse_proxy'
 require 'ritm/proxy/proxy_server'
 require 'ritm/certs/ca'
 require 'ritm/interception/handlers'
+require 'ritm/interception/http_forwarder'
 
 module Ritm
   module Proxy
@@ -13,13 +14,11 @@ module Ritm
         build_proxy
       end
 
-      # Starts the service (non blocking)
       def start
         @https.start_async
         @http.start_async
       end
 
-      # Stops the service
       def shutdown
         @https.shutdown
         @http.shutdown
@@ -32,8 +31,10 @@ module Ritm
         ssl_proxy_host = @conf.ssl_reverse_proxy.bind_address
         ssl_proxy_port = @conf.ssl_reverse_proxy.bind_port
         @https_forward = "#{ssl_proxy_host}:#{ssl_proxy_port}"
-        @request_interceptor = default_request_handler(session)
-        @response_interceptor = default_response_handler(session)
+
+        request_interceptor = default_request_handler(session)
+        response_interceptor = default_response_handler(session)
+        @forwarder = HTTPForwarder.new(request_interceptor, response_interceptor, @conf)
 
         crt_path = @conf.ssl_reverse_proxy.ca.pem
         key_path = @conf.ssl_reverse_proxy.ca.key
@@ -47,17 +48,14 @@ module Ritm
                                              Logger: WEBrick::Log.new(File.open(File::NULL, 'w')),
                                              https_forward: @https_forward,
                                              ProxyVia: nil,
-                                             request_interceptor: @request_interceptor,
-                                             response_interceptor: @response_interceptor,
+                                             forwarder: @forwarder,
                                              ritm_conf: @conf)
       end
 
       def build_reverse_proxy
         @https = Ritm::Proxy::SSLReverseProxy.new(@conf.ssl_reverse_proxy.bind_port,
                                                   @certificate,
-                                                  @conf,
-                                                  request_interceptor: @request_interceptor,
-                                                  response_interceptor: @response_interceptor)
+                                                  @forwarder)
       end
 
       def ca_certificate(pem, key)

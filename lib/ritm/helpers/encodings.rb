@@ -1,7 +1,6 @@
 require 'zlib'
 
 module Ritm
-  # ENCODER/DECODER of HTTP content
   module Encodings
     ENCODINGS = %i[identity gzip deflate].freeze
 
@@ -34,7 +33,6 @@ module Ritm
     class << self
       private
 
-      # Returns data unchanged. Identity is the default value of Accept-Encoding headers.
       def identity(data)
         data
       end

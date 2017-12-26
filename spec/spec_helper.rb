@@ -22,6 +22,7 @@ RSpec.configure do |c|
     https_pid = fork { SslWebServer.run! }
     Thread.pass
   end
+
   c.after(:suite) do
     Ritm.shutdown
     Process.kill('INT', http_pid)

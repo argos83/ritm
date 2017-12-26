@@ -1,3 +1,6 @@
+1.0.3
+	* Fix incorrect handling of some set-cookie headers
+
 1.0.2
 	* Fix response content-length calculation
 

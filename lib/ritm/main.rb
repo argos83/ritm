@@ -1,6 +1,5 @@
 require 'ritm/session'
 
-# Main module
 module Ritm
   GLOBAL_SESSION = Session.new
 

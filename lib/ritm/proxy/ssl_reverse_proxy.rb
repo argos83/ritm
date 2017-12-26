@@ -11,9 +11,8 @@ module Ritm
       # Creates a HTTPS server with the given settings
       # @param port [Fixnum]: TCP port to bind the service
       # @param ca [Ritm::CA]: The certificate authority used to sign fake server certificates
-      # @param request_interceptor [Proc]: If given, it will be invoked before proxying the request
-      # @param response_interceptor [Proc]: If give, it will be invoked before sending back the response
-      def initialize(port, ca, conf, request_interceptor: nil, response_interceptor: nil)
+      # @param forwarder [Ritm::HTTPForwarder]: Forwards http traffic with interception
+      def initialize(port, ca, forwarder)
         @ca = ca
         default_vhost = 'localhost'
         @server = CertSigningHTTPSServer.new(Port: port,
@@ -21,8 +20,7 @@ module Ritm
                                              Logger: WEBrick::Log.new(File.open(File::NULL, 'w')),
                                              ca: ca,
                                              **vhost_settings(default_vhost))
-
-        @server.mount '/', RequestInterceptorServlet, request_interceptor, response_interceptor, conf
+        @server.mount '/', RequestInterceptorServlet, forwarder
       end
 
       def start_async

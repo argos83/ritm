@@ -1,6 +1,6 @@
 require 'faraday'
-
 require 'ritm/interception/intercept_utils'
+require 'webrick/cookie'
 
 module Ritm
   # Forwarder that acts as a WEBrick <-> Faraday adaptor: Works this way:
@@ -13,6 +13,21 @@ module Ritm
   #
   # Besides the possible modifications to be done by interceptors there might be automated globally configured
   # transformations like header stripping/adding.
+
+  class ParamEncoder
+    def encode(params)
+      pairs = params.map { |k, v| "#{k}=#{v}" }
+      pairs.join('&')
+    end
+
+    def decode(query)
+      query.split('&').each_with_object({}) do |param, params|
+        k, v = param.split('=')
+        params[k] = v
+      end
+    end
+  end
+
   class HTTPForwarder
     include InterceptUtils
 
@@ -21,9 +36,11 @@ module Ritm
       @response_interceptor = response_interceptor
       @config = context_config
       # TODO: make SSL verification a configuration setting
-      @client = Faraday.new(ssl: { verify: false }) do |conn|
+      @client = Faraday.new(
+        ssl: { verify: false },
+        request: { params_encoder: ParamEncoder.new }
+      ) do |conn|
         conn.adapter :net_http
-        conn.proxy = @config.misc.upstream_proxy unless @config.misc.upstream_proxy.nil?
       end
     end
 
@@ -39,11 +56,10 @@ module Ritm
     def faraday_forward(request)
       req_method = request.request_method.downcase
       @client.send req_method do |req|
+        req.options[:proxy] = @config.misc.upstream_proxy
         req.url request.request_uri
         req.body = request.body
-        request.header.each do |name, value|
-          req.headers[name] = value
-        end
+        request.header.each { |name, value| req.headers[name] = value }
       end
     end
 
@@ -51,7 +67,11 @@ module Ritm
       webrick_response.status = faraday_response.status
       webrick_response.body = faraday_response.body
       faraday_response.headers.each do |name, value|
-        webrick_response[name] = value
+        if name == 'set-cookie'
+          WEBrick::Cookie.parse_set_cookies(value).each { |cookie| webrick_response.cookies << cookie }
+        else
+          webrick_response[name] = value
+        end
       end
       webrick_response
     end

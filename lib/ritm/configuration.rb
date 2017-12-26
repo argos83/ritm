@@ -2,7 +2,6 @@ require 'dot_hash'
 require 'set'
 
 module Ritm
-  # Global Ritm settings
   class Configuration
     def default_settings # rubocop:disable Metrics/MethodLength
       {
@@ -60,12 +59,10 @@ module Ritm
       end
     end
 
-    # Re-enable interception
     def enable
       @settings.intercept[:enabled] = true
     end
 
-    # Disable interception
     def disable
       @settings.intercept[:enabled] = false
     end

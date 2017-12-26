@@ -67,7 +67,8 @@ module Ritm
       webrick_response.status = faraday_response.status
       webrick_response.body = faraday_response.body
       faraday_response.headers.each do |name, value|
-        if name == 'set-cookie'
+        case name
+        when 'set-cookie'
           WEBrick::Cookie.parse_set_cookies(value).each { |cookie| webrick_response.cookies << cookie }
         else
           webrick_response[name] = value

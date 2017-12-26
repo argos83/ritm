@@ -9,7 +9,7 @@ module Ritm
   module Proxy
     # Patches WEBrick::HTTPServer SSL context creation to get
     # a callback on the 'Client Helo' step of the SSL-Handshake if SNI is specified
-    # So we can create self-signed certificates on the fly
+    # So RitM can create self-signed certificates on the fly
     class CertSigningHTTPSServer < WEBrick::HTTPServer
       # Override
       def setup_ssl_context(config)

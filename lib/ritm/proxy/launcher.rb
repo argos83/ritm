@@ -14,13 +14,11 @@ module Ritm
         build_proxy
       end
 
-      # Starts the service (non blocking)
       def start
         @https.start_async
         @http.start_async
       end
 
-      # Stops the service
       def shutdown
         @https.shutdown
         @http.shutdown

@@ -33,8 +33,9 @@ module Ritm
         @https_forward = "#{ssl_proxy_host}:#{ssl_proxy_port}"
 
         request_interceptor = default_request_handler(session)
+        forward_interceptor = default_forward_handler(session)
         response_interceptor = default_response_handler(session)
-        @forwarder = HTTPForwarder.new(request_interceptor, response_interceptor, @conf)
+        @forwarder = HTTPForwarder.new(request_interceptor, forward_interceptor, response_interceptor, @conf)
 
         crt_path = @conf.ssl_reverse_proxy.ca.pem
         key_path = @conf.ssl_reverse_proxy.ca.key

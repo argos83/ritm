@@ -10,6 +10,11 @@ module Ritm
       postprocess(request, intercept_request_settings)
     end
 
+    def intercept_forward(handler, request, response, &block)
+      return if handler.nil?
+      handler.call(request, response, &block)
+    end
+
     def intercept_response(handler, request, response, intercept_response_settings)
       return if handler.nil?
       preprocess(response, intercept_response_settings)

@@ -31,8 +31,9 @@ module Ritm
   class HTTPForwarder
     include InterceptUtils
 
-    def initialize(request_interceptor, response_interceptor, context_config)
+    def initialize(request_interceptor, forward_interceptor, response_interceptor, context_config)
       @request_interceptor = request_interceptor
+      @forward_interceptor = forward_interceptor
       @response_interceptor = response_interceptor
       @config = context_config
       # TODO: make SSL verification a configuration setting
@@ -46,8 +47,10 @@ module Ritm
 
     def forward(request, response)
       intercept_request(@request_interceptor, request, @config.intercept.request)
-      faraday_response = faraday_forward request
-      to_webrick_response faraday_response, response
+      intercept_forward(@forward_interceptor, request, response) do
+        faraday_response = faraday_forward request
+        to_webrick_response faraday_response, response
+      end
       intercept_response(@response_interceptor, request, response, @config.intercept.response)
     end
 

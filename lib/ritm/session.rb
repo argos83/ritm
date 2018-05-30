@@ -50,6 +50,10 @@ module Ritm
       dispatcher.on_request(&block)
     end
 
+    def on_forward(&block)
+      dispatcher.on_forward(&block)
+    end
+
     def on_response(&block)
       dispatcher.on_response(&block)
     end

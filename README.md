@@ -47,10 +47,12 @@ requests and responses as she pleases.
   
   Ritm.shutdown
   ```
+
 3. **Configure your browser**
 
   Or whatever HTTP client you want to intercept traffic from, to connect
   to the proxy in `localhost:8080`
+
 4. **Browse the web!**
 
   For the examples above, search anything in google and also visit your
@@ -125,6 +127,7 @@ CA should be used to sign certificates**
   I'll leave it to you to figure out how this is done in your browser or
   client.
 4. **Surf the web!**
+
 5. When you are done **Remove the CA from your trusted authorities!** 
 
   Or take really good care of the CA private key since anyone in

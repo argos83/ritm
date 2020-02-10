@@ -1,3 +1,4 @@
+require 'net/http'
 require 'openssl'
 require 'webrick'
 require 'webrick/https'
@@ -33,7 +34,11 @@ module Ritm
         ctx.servername_cb = proc do |sock, servername|
           mutex.synchronize do
             unless contexts.include? servername
-              cert = Ritm::Certificate.create(servername)
+              begin
+                cert = fetch_remote_cert(servername)
+              rescue StandardError
+                cert = Ritm::Certificate.create(servername)
+              end
               ca.sign(cert)
               contexts[servername] = context_with_cert(sock.context, cert)
             end
@@ -61,6 +66,17 @@ module Ritm
         end
         ctx
       end
+
+      def fetch_remote_cert(servername)
+        host = servername.gsub( "*.", "www." )
+        x509_cert = Net::HTTP.start(
+          host,
+          '443', use_ssl: true, verify_mode: OpenSSL::SSL::VERIFY_NONE,
+          &:peer_cert
+        )
+        Ritm::Certificate.new(CertificateAuthority::Certificate.from_openssl(x509_cert))
+      end
     end
   end
 end
+

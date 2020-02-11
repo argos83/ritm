@@ -20,9 +20,9 @@ module Ritm
       end
     end
 
-    def sign(certificate)
+    def sign(certificate, extensions = self.class.signing_profile)
       certificate.cert.parent = @cert
-      certificate.cert.sign!(self.class.signing_profile)
+      certificate.cert.sign!(extensions)
     end
 
     def self.signing_profile

@@ -34,12 +34,12 @@ module Ritm
         ctx.servername_cb = proc do |sock, servername|
           mutex.synchronize do
             unless contexts.include? servername
-              begin
-                cert = fetch_remote_cert(servername)
-              rescue StandardError
-                cert = Ritm::Certificate.create(servername)
-              end
-              ca.sign(cert)
+              cert = Ritm::Certificate.create(servername)
+              extensions = Ritm::CA.signing_profile
+              extensions['extensions']['subjectAltName'] = {
+                'dns_names' => [servername]
+              }
+              ca.sign(cert, extensions)
               contexts[servername] = context_with_cert(sock.context, cert)
             end
           end
@@ -65,16 +65,6 @@ module Ritm
           ctx.send(set_prop_method, original_ctx.send(prop_name)) if ctx.respond_to? set_prop_method
         end
         ctx
-      end
-
-      def fetch_remote_cert(servername)
-        host = servername.gsub( "*.", "www." )
-        x509_cert = Net::HTTP.start(
-          host,
-          '443', use_ssl: true, verify_mode: OpenSSL::SSL::VERIFY_NONE,
-          &:peer_cert
-        )
-        Ritm::Certificate.new(CertificateAuthority::Certificate.from_openssl(x509_cert))
       end
     end
   end

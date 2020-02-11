@@ -1,4 +1,3 @@
-require 'net/http'
 require 'openssl'
 require 'webrick'
 require 'webrick/https'

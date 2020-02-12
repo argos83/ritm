@@ -34,7 +34,11 @@ module Ritm
           mutex.synchronize do
             unless contexts.include? servername
               cert = Ritm::Certificate.create(servername)
-              ca.sign(cert)
+              extensions = Ritm::CA.signing_profile
+              extensions['extensions']['subjectAltName'] = {
+                'dns_names' => [servername]
+              }
+              ca.sign(cert, extensions)
               contexts[servername] = context_with_cert(sock.context, cert)
             end
           end
@@ -64,3 +68,4 @@ module Ritm
     end
   end
 end
+

@@ -53,7 +53,8 @@ module Ritm
       end
 
       def build_reverse_proxy
-        @https = Ritm::Proxy::SSLReverseProxy.new(@conf.ssl_reverse_proxy.bind_port,
+        @https = Ritm::Proxy::SSLReverseProxy.new(@conf.ssl_reverse_proxy.bind_address,
+                                                  @conf.ssl_reverse_proxy.bind_port,
                                                   @certificate,
                                                   @forwarder)
       end

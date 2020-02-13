@@ -9,13 +9,15 @@ module Ritm
     # It does man-in-the-middle with on-the-fly certificate signing using the given CA
     class SSLReverseProxy
       # Creates a HTTPS server with the given settings
+      # @param host [String]: Host to bind the service
       # @param port [Fixnum]: TCP port to bind the service
       # @param ca [Ritm::CA]: The certificate authority used to sign fake server certificates
       # @param forwarder [Ritm::HTTPForwarder]: Forwards http traffic with interception
-      def initialize(port, ca, forwarder)
+      def initialize(host, port, ca, forwarder)
         @ca = ca
         default_vhost = 'localhost'
-        @server = CertSigningHTTPSServer.new(Port: port,
+        @server = CertSigningHTTPSServer.new(BindAddress: host,
+                                             Port: port,
                                              AccessLog: [],
                                              Logger: WEBrick::Log.new(File.open(File::NULL, 'w')),
                                              ca: ca,

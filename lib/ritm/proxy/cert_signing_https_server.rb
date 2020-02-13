@@ -36,9 +36,11 @@ module Ritm
               cert = Ritm::Certificate.create(servername)
               extensions = Ritm::CA.signing_profile
               extensions['extensions']['subjectAltName'] = {
-                'dns_names' => [servername]
+                'dns_names' => [servername],
+                'uris' => [servername]
               }
               ca.sign(cert, extensions)
+
               contexts[servername] = context_with_cert(sock.context, cert)
             end
           end

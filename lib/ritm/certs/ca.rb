@@ -30,7 +30,8 @@ module Ritm
         'extensions' => {
           'keyUsage' => { 'usage' => %w[keyEncipherment digitalSignature] },
           'extendedKeyUsage' => { 'usage' => %w[serverAuth clientAuth] }
-        }
+        },
+        'digest' => 'SHA512'
       }
     end
 

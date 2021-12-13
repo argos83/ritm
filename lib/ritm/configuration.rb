@@ -7,7 +7,12 @@ module Ritm
       {
         proxy: {
           bind_address: '127.0.0.1',
-          bind_port: 8080
+          bind_port: 8080,
+          auth_proc: Proc.new do |req, res|
+            WEBrick::HTTPAuth.proxy_basic_auth(req, res, 'proxy') do |user, pass|
+              user == "user" && pass == "pass"
+            end
+          end
         },
 
         ssl_reverse_proxy: {

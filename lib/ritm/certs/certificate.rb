@@ -20,7 +20,7 @@ module Ritm
       cert.subject.country = 'AR'
       cert.not_before = cert.not_before - 3600 * 24 * 30 # Substract 30 days
       cert.serial_number.number = serial_number || common_name.hash.abs
-      cert.key_material.generate_key(1024)
+      cert.key_material.generate_key(4096)
       yield cert if block_given?
       new cert
     end

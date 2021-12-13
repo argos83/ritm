@@ -44,6 +44,7 @@ module Ritm
       def build_proxy
         @http = Ritm::Proxy::ProxyServer.new(BindAddress: @conf.proxy.bind_address,
                                              Port: @conf.proxy.bind_port,
+                                             ProxyAuthProc: @conf.proxy.auth_proc,
                                              AccessLog: [],
                                              Logger: WEBrick::Log.new(File.open(File::NULL, 'w')),
                                              https_forward: @https_forward,
